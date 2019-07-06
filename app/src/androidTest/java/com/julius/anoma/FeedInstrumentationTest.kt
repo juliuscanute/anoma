@@ -1,13 +1,10 @@
 package com.julius.anoma
 
 import android.content.Intent
-import android.view.View
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.ActivityTestRule
 import com.julius.anoma.repository.Feed
@@ -15,8 +12,7 @@ import com.julius.anoma.repository.FeedAggregator
 import com.julius.anoma.repository.Repository
 import com.julius.anoma.ui.MainActivity
 import com.julius.anoma.ui.MainActivityViewModel
-import org.hamcrest.Description
-import org.hamcrest.Matcher
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.koin.android.viewmodel.dsl.viewModel
@@ -30,9 +26,9 @@ class FeedInstrumentationTest : KoinTest {
 
     @get:Rule
     var activityTestRule = ActivityTestRule(MainActivity::class.java, true, false)
-    
-    @Test
-    fun testIfViewsAreDisplayedOnFindMatchActivityLaunch() {
+
+    @Before
+    fun startKoin() {
         loadKoinModules(module(override = true) {
             single {
                 object : Repository {
@@ -48,6 +44,10 @@ class FeedInstrumentationTest : KoinTest {
             }
             viewModel { MainActivityViewModel(get()) }
         })
+    }
+
+    @Test
+    fun testIfViewsAreDisplayed() {
         activityTestRule.launchActivity(Intent())
         verifyIfTitleTextIsDisplayed("Feeds")
         isItemDisplayed(0, "A", R.id.heading)
@@ -70,23 +70,5 @@ class FeedInstrumentationTest : KoinTest {
                 )
             )
         )
-    }
-
-    private fun recyclerViewAtPositionOnView(
-        position: Int,
-        itemMatcher: Matcher<View>,
-        targetViewId: Int
-    ): Matcher<View> {
-        return object : BoundedMatcher<View, RecyclerView>(RecyclerView::class.java) {
-            override fun describeTo(description: Description) {
-                description.appendText("has view id $itemMatcher at position $position")
-            }
-
-            override fun matchesSafely(recyclerView: RecyclerView): Boolean {
-                val viewHolder = recyclerView.findViewHolderForAdapterPosition(position)
-                val targetView = viewHolder!!.itemView.findViewById<View>(targetViewId)
-                return itemMatcher.matches(targetView)
-            }
-        }
     }
 }

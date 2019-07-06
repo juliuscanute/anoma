@@ -25,8 +25,10 @@ class FeedListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mainActivityViewModel.feeds.observe(this, Observer {
-            feedList.adapter = FeedAdapter(it)
+        mainActivityViewModel.feeds.observe(this, Observer {list->
+            context?.let {
+                feedList.adapter = FeedAdapter(list,it)
+            }
         })
         mainActivityViewModel.title.observe(this, Observer {
             (activity as AppCompatActivity).supportActionBar?.title = it
