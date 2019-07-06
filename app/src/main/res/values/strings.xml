@@ -3,4 +3,5 @@
     <string name="heading">Heading</string>
     <string name="body">Body</string>
     <string name="thumbnail_image">Thumbnail Image</string>
+    <string name="back_button">Back</string>
 </resources>

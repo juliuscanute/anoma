@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.julius.anoma.R
 import com.julius.anoma.repository.Feed
@@ -40,6 +41,10 @@ class FeedAdapter(private val feedItems: List<Feed>, private val context: Contex
         fun bind(feedItem: Feed) {
             heading.text = feedItem.title
             content.text = feedItem.description
+            thumbnail.setOnClickListener {
+                val bundle = FullScreenFragment.newBundle(feedItem.imageHref)
+                itemView.findNavController().navigate(R.id.listToFullScreenAction, bundle)
+            }
             loadThumbnail(feedItem)
         }
 
