@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/nav_graph" app:startDestination="@id/feedListFragment">
+
+    <fragment android:id="@+id/feedListFragment" android:name="com.julius.anoma.ui.FeedListFragment"
+              android:label="FeedListFragment"/>
+</navigation>
