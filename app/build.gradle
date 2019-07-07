@@ -34,7 +34,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-fragment-ktx:2.0.0'
     implementation 'androidx.navigation:navigation-ui-ktx:2.0.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-
+    implementation 'androidx.paging:paging-runtime:2.1.0'
 
     //Kotlin Dependency Injection
     implementation 'org.koin:koin-core:2.0.1'
@@ -42,8 +42,12 @@ dependencies {
     implementation 'org.koin:koin-android-viewmodel:2.0.1'
 
     //Image Loading & Transformation
-    implementation "com.squareup.picasso:picasso:2.71828"
+    implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'jp.wasabeef:picasso-transformations:2.2.1'
+
+    //Backend Services Libraries
+    implementation 'com.squareup.retrofit2:retrofit:2.5.0'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.5.0'
 
     //Test Libraries
     testImplementation 'junit:junit:4.12'
