@@ -1,6 +1,5 @@
 package com.julius.anoma.ui
 
-import android.content.Context
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -8,9 +7,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.navigation.findNavController
+import androidx.paging.PagedListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.julius.anoma.R
-import com.julius.anoma.repository.Feed
+import com.julius.anoma.data.dto.Feed
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
@@ -18,31 +19,29 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import java.lang.Exception
 
-class FeedAdapter(private val feedItems: List<Feed>, private val context: Context) :
-    RecyclerView.Adapter<FeedAdapter.ViewHolder>(), KoinComponent {
+class FeedAdapter :
+    PagedListAdapter<Feed, RecyclerView.ViewHolder>(REPO_COMPARATOR), KoinComponent {
 
     private val picasso: Picasso by inject()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewItemHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val listItem = layoutInflater.inflate(R.layout.feed_item_card, parent, false)
-        return ViewHolder(listItem)
+        return ViewItemHolder(listItem)
     }
 
-    override fun getItemCount(): Int {
-        return feedItems.size
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val feedItem = getItem(position)
+        feedItem?.let {
+            (holder as ViewItemHolder).bind(feedItem)
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val feedItem = feedItems[position]
-        holder.bind(feedItem)
-    }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class ViewItemHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val heading: TextView = itemView.findViewById(R.id.heading)
         private val content: TextView = itemView.findViewById(R.id.content)
         private val thumbnail: ImageView = itemView.findViewById(R.id.thumbnail)
-
+        private val context = itemView.context
         fun bind(feedItem: Feed) {
             heading.text = feedItem.title
             content.text = feedItem.description
@@ -86,6 +85,16 @@ class FeedAdapter(private val feedItems: List<Feed>, private val context: Contex
                 thumbnail.setImageResource(R.drawable.ic_broken_image_placeholder)
                 thumbnail.setOnClickListener {}
             }
+        }
+    }
+
+    companion object {
+        private val REPO_COMPARATOR = object : DiffUtil.ItemCallback<Feed>() {
+            override fun areItemsTheSame(oldItem: Feed, newItem: Feed): Boolean =
+                oldItem.title == newItem.title
+
+            override fun areContentsTheSame(oldItem: Feed, newItem: Feed): Boolean =
+                oldItem.description == newItem.description && oldItem.title == newItem.title && oldItem.imageHref == newItem.imageHref
         }
     }
 }

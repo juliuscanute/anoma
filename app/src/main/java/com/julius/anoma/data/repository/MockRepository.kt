@@ -1,4 +1,7 @@
-package com.julius.anoma.repository
+package com.julius.anoma.data.repository
+
+import com.julius.anoma.data.dto.Feed
+import com.julius.anoma.data.dto.FeedAggregator
 
 class MockRepository : Repository {
     override fun getFeeds(): FeedAggregator {

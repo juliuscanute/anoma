@@ -1,7 +1,9 @@
-package com.julius.anoma.repository
+package com.julius.anoma.data.repository
 
-import com.julius.anoma.repository.api.FeedApi
-import com.julius.anoma.repository.exception.FetchException
+import com.julius.anoma.data.api.FeedApi
+import com.julius.anoma.data.dto.Feed
+import com.julius.anoma.data.dto.FeedAggregator
+import com.julius.anoma.data.exception.FetchException
 import retrofit2.HttpException
 import retrofit2.Response
 

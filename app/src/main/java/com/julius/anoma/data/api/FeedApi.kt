@@ -1,6 +1,6 @@
-package com.julius.anoma.repository.api
+package com.julius.anoma.data.api
 
-import com.julius.anoma.repository.FeedAggregator
+import com.julius.anoma.data.dto.FeedAggregator
 import retrofit2.Call
 import retrofit2.http.GET
 

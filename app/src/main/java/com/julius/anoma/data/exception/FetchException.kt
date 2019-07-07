@@ -1,4 +1,4 @@
-package com.julius.anoma.repository.exception
+package com.julius.anoma.data.exception
 
 import java.lang.Exception
 

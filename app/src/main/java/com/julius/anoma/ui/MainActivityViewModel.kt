@@ -1,46 +1,28 @@
 package com.julius.anoma.ui
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.julius.anoma.repository.Feed
-import com.julius.anoma.repository.Repository
-import kotlinx.coroutines.*
-import java.lang.Exception
+import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagedList
+import com.julius.anoma.data.datasource.FeedsDataSourceFactory
+import com.julius.anoma.data.dto.Feed
+import com.julius.anoma.data.dto.NetworkMessage
 
 enum class NetworkStatus { SUCCESS, ERROR, START }
-class MainActivityViewModel(private val repository: Repository, val dispatcher: CoroutineDispatcher) : ViewModel() {
-    private val viewModelJob = SupervisorJob()
-    private val uiScope = CoroutineScope(Dispatchers.Default + viewModelJob)
-
-    val feeds: MutableLiveData<List<Feed>> = MutableLiveData<List<Feed>>().apply { value = arrayListOf() }
+class MainActivityViewModel(
+    config: PagedList.Config,
+    dataSourceFactory: FeedsDataSourceFactory,
+    val networkStatus: MutableLiveData<Event<NetworkMessage>>
+) : ViewModel() {
+    val feeds: LiveData<PagedList<Feed>> = LivePagedListBuilder(dataSourceFactory, config).build()
     val title: MutableLiveData<String> = MutableLiveData()
-    val networkStatus: MutableLiveData<Event<NetworkStatus>> = MutableLiveData()
 
-    init {
-        getFeeds()
+    fun setTitle(header: String) {
+        title.postValue(header)
     }
 
-    fun getFeeds() {
-        uiScope.launch {
-            try {
-                networkStatus.postValue(Event(NetworkStatus.START))
-                val newsFeed = loadData()
-                feeds.postValue(newsFeed.rows)
-                title.postValue(newsFeed.title)
-                networkStatus.postValue(Event(NetworkStatus.SUCCESS))
-            } catch (e: Exception) {
-                networkStatus.postValue(Event(NetworkStatus.ERROR))
-            }
-
-        }
-    }
-
-    private suspend fun loadData() = withContext(dispatcher) {
-        repository.getFeeds()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
+    fun invalidateDataSource() {
+        feeds.value?.dataSource?.invalidate()
     }
 }

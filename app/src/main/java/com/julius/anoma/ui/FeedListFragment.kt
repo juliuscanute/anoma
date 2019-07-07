@@ -20,6 +20,7 @@ class FeedListFragment : Fragment() {
     private val mainActivityViewModel: MainActivityViewModel by viewModel()
     private val imageCache: LruCache by inject()
     private val httpCache: Cache by inject()
+    private val feedAdapter = FeedAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,53 +31,48 @@ class FeedListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        feedList.adapter = feedAdapter
         mainActivityViewModel.feeds.observe(this, Observer { list ->
-            context?.let {
-                feedList.adapter = FeedAdapter(list, it)
-            }
+            feedAdapter.submitList(list)
+            updateAfterRefresh(list.size)
         })
         (activity as AppCompatActivity).setSupportActionBar(appToolbar)
+        refreshLayout.setOnRefreshListener {
+            imageCache.clear()
+            httpCache.evictAll()
+            startRefresh()
+        }
         mainActivityViewModel.title.observe(this, Observer {
             (activity as AppCompatActivity).supportActionBar?.apply {
                 title = it
             }
         })
-        refreshLayout.setOnRefreshListener {
-            imageCache.clear()
-            httpCache.evictAll()
-            context?.let {
-                feedList.adapter = FeedAdapter(arrayListOf(),it)
-            }
-            startRefresh()
-        }
         mainActivityViewModel.networkStatus.observe(this, Observer { event ->
-            event.getContentIfNotHandled()?.let {
-                when (it) {
+            event.getContentIfNotHandled()?.let { message ->
+                when (message.status) {
                     NetworkStatus.START -> {
                         refreshLayout.isRefreshing = true
                     }
                     NetworkStatus.SUCCESS -> {
-                        updateAfterRefresh()
+                        refreshLayout.isRefreshing = false
+                        mainActivityViewModel.setTitle(message.title)
                     }
                     NetworkStatus.ERROR -> {
-                        updateAfterRefresh()
+                        refreshLayout.isRefreshing = false
                     }
                 }
             }
         })
     }
 
-    private fun updateAfterRefresh() {
-        refreshLayout.isRefreshing = false
-        feedList.adapter?.itemCount?.let {
-            if (it > 0)
-                networkStatus.visibility = View.GONE
-            else
-                networkStatus.visibility = View.VISIBLE
-        }
+    private fun updateAfterRefresh(dataSize: Int) {
+        if (dataSize > 0)
+            networkStatus.visibility = View.GONE
+        else
+            networkStatus.visibility = View.VISIBLE
     }
 
     private fun startRefresh() {
-        mainActivityViewModel.getFeeds()
+        mainActivityViewModel.invalidateDataSource()
     }
 }

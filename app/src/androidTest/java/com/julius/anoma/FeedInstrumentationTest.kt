@@ -7,16 +7,12 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.ActivityTestRule
-import com.julius.anoma.repository.Feed
-import com.julius.anoma.repository.FeedAggregator
-import com.julius.anoma.repository.Repository
+import com.julius.anoma.data.dto.Feed
+import com.julius.anoma.data.dto.FeedAggregator
+import com.julius.anoma.data.repository.Repository
 import com.julius.anoma.ui.MainActivity
-import com.julius.anoma.ui.MainActivityViewModel
-import kotlinx.coroutines.Dispatchers
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.core.context.loadKoinModules
 import org.koin.dsl.module
 import org.koin.test.KoinTest
@@ -43,7 +39,6 @@ class FeedInstrumentationTest : KoinTest {
                     }
                 } as Repository
             }
-            viewModel { MainActivityViewModel(get(), Dispatchers.Main) }
         })
         activityTestRule.launchActivity(Intent())
         verifyIfTitleTextIsDisplayed("Feeds")
@@ -65,7 +60,6 @@ class FeedInstrumentationTest : KoinTest {
                     }
                 } as Repository
             }
-            viewModel { MainActivityViewModel(get(), Dispatchers.Main) }
         })
         activityTestRule.launchActivity(Intent())
         verifyIfNoItemMessageDisplayed()
