@@ -11,13 +11,15 @@ import androidx.navigation.fragment.findNavController
 import com.julius.anoma.R
 import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_full_screen.*
+import org.koin.android.ext.android.inject
 import org.koin.android.viewmodel.ext.android.viewModel
+import org.koin.core.inject
 
 private const val URI_STRING = "uri_string"
 
 class FullScreenFragment : Fragment() {
     private var uri: String? = null
-    private val mainActivityViewModel: MainActivityViewModel by viewModel()
+    private val picasso: Picasso by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +40,7 @@ class FullScreenFragment : Fragment() {
         backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-        Picasso.get()
+        picasso
             .load(uri)
             .error(R.drawable.ic_broken_image_placeholder)
             .placeholder(R.drawable.ic_crop_original)

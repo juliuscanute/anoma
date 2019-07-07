@@ -11,12 +11,17 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.julius.anoma.R
 import com.julius.anoma.repository.Feed
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.RoundedCornersTransformation
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import java.lang.Exception
 
 class FeedAdapter(private val feedItems: List<Feed>, private val context: Context) :
-    RecyclerView.Adapter<FeedAdapter.ViewHolder>() {
+    RecyclerView.Adapter<FeedAdapter.ViewHolder>(), KoinComponent {
+
+    private val picasso: Picasso by inject()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -41,18 +46,14 @@ class FeedAdapter(private val feedItems: List<Feed>, private val context: Contex
         fun bind(feedItem: Feed) {
             heading.text = feedItem.title
             content.text = feedItem.description
-            thumbnail.setOnClickListener {
-                val bundle = FullScreenFragment.newBundle(feedItem.imageHref)
-                itemView.findNavController().navigate(R.id.listToFullScreenAction, bundle)
-            }
             loadThumbnail(feedItem)
         }
 
         private fun loadThumbnail(feedItem: Feed) {
-            if (feedItem.imageHref.isNotEmpty()) {
+            feedItem.imageHref?.let {
                 try {
-                    val uri = Uri.parse(feedItem.imageHref)
-                    Picasso.get()
+                    val uri = Uri.parse(it)
+                    picasso
                         .load(uri)
                         .transform(
                             RoundedCornersTransformation(
@@ -62,10 +63,28 @@ class FeedAdapter(private val feedItems: List<Feed>, private val context: Contex
                         )
                         .error(R.drawable.ic_broken_image_placeholder)
                         .placeholder(R.drawable.ic_crop_original)
-                        .into(thumbnail)
+                        .into(thumbnail, object : Callback {
+                            override fun onSuccess() {
+                                thumbnail.setOnClickListener {
+                                    feedItem.imageHref?.let {
+                                        val bundle = FullScreenFragment.newBundle(it)
+                                        itemView.findNavController().navigate(R.id.listToFullScreenAction, bundle)
+                                    }
+                                }
+                            }
+
+                            override fun onError(e: Exception?) {
+                                thumbnail.setOnClickListener {}
+                            }
+
+                        })
                 } catch (e: Exception) {
                     thumbnail.setImageResource(R.drawable.ic_broken_image_placeholder)
                 }
+            }
+            if (feedItem.imageHref == null) {
+                thumbnail.setImageResource(R.drawable.ic_broken_image_placeholder)
+                thumbnail.setOnClickListener {}
             }
         }
     }

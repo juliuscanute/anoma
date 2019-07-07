@@ -12,6 +12,7 @@ import com.julius.anoma.repository.FeedAggregator
 import com.julius.anoma.repository.Repository
 import com.julius.anoma.ui.MainActivity
 import com.julius.anoma.ui.MainActivityViewModel
+import kotlinx.coroutines.Dispatchers
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -27,8 +28,8 @@ class FeedInstrumentationTest : KoinTest {
     @get:Rule
     var activityTestRule = ActivityTestRule(MainActivity::class.java, true, false)
 
-    @Before
-    fun startKoin() {
+    @Test
+    fun testIfViewsAreDisplayed() {
         loadKoinModules(module(override = true) {
             single {
                 object : Repository {
@@ -42,18 +43,36 @@ class FeedInstrumentationTest : KoinTest {
                     }
                 } as Repository
             }
-            viewModel { MainActivityViewModel(get()) }
+            viewModel { MainActivityViewModel(get(), Dispatchers.Main) }
         })
-    }
-
-    @Test
-    fun testIfViewsAreDisplayed() {
         activityTestRule.launchActivity(Intent())
         verifyIfTitleTextIsDisplayed("Feeds")
         isItemDisplayed(0, "A", R.id.heading)
         isItemDisplayed(0, "A1", R.id.content)
         isItemDisplayed(1, "B", R.id.heading)
         isItemDisplayed(1, "B1", R.id.content)
+    }
+
+    @Test
+    fun testNoDataLoad() {
+        loadKoinModules(module(override = true) {
+            single {
+                object : Repository {
+                    override fun getFeeds(): FeedAggregator {
+                        return FeedAggregator(
+                            null, listOf()
+                        )
+                    }
+                } as Repository
+            }
+            viewModel { MainActivityViewModel(get(), Dispatchers.Main) }
+        })
+        activityTestRule.launchActivity(Intent())
+        verifyIfNoItemMessageDisplayed()
+    }
+
+    private fun verifyIfNoItemMessageDisplayed() {
+        Espresso.onView(withId(R.id.networkStatus)).check(matches(isDisplayed()))
     }
 
     private fun verifyIfTitleTextIsDisplayed(text: String) {

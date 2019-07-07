@@ -6,9 +6,13 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
 class FeedsApplication : Application() {
+    companion object {
+        lateinit var instance: FeedsApplication
+    }
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         startKoin {
             androidContext(this@FeedsApplication)
             modules(feedModule)
